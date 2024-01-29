@@ -4,6 +4,24 @@
 // This means that only one hc06 instance can be used at a time
 hc06_t * p_hc06 = NULL;
 
+// Helper function to store received hc06 data as an interrupt handler
+static void handle_rx_irq(void) {
+    if(p_hc06 != NULL) {
+        // Read from UART FIFO until it's empty
+        while(uart_is_readable(p_hc06->uart_id)) {
+            // Read a byte from the FIFO
+            uint8_t rx_data = uart_getc(p_hc06->uart_id);
+
+            // Write the byte to the circular buffer
+            p_hc06->rx_buffer.buffer[p_hc06->rx_buffer.head] = rx_data;
+
+            // Increment head position
+            p_hc06->rx_buffer.head = (p_hc06->rx_buffer.head + 1) % HC06_BUF_SIZE; 
+        }
+    }
+}
+
+// Initialize HC-06 module
 void hc06_init(hc06_t * hc06, uart_inst_t * uart_id, uint32_t baud_rate, uint8_t uart_tx_pin, uint8_t uart_rx_pin, uint8_t uart_irq)
 {
     // Register data provided by args into hc06 struct
@@ -14,7 +32,7 @@ void hc06_init(hc06_t * hc06, uart_inst_t * uart_id, uint32_t baud_rate, uint8_t
     hc06->uart_irq = uart_irq;
 
     // Clear rx buffer
-    for(uint8_t i = 0; i < BUF_SIZE; i++) {
+    for(uint8_t i = 0; i < HC06_BUF_SIZE; i++) {
         hc06->rx_buffer.buffer[i] = 0;
     }
 
@@ -33,40 +51,17 @@ void hc06_init(hc06_t * hc06, uart_inst_t * uart_id, uint32_t baud_rate, uint8_t
     gpio_set_function(hc06->uart_rx_pin, GPIO_FUNC_UART);
 
     // Set up and enable interrupt handler for UART
-    irq_set_exclusive_handler(hc06->uart_irq, hc06_uart_rx);
+    irq_set_exclusive_handler(hc06->uart_irq, handle_rx_irq);
     irq_set_enabled(hc06->uart_irq, true);
     uart_set_irq_enables(hc06->uart_id, true, false);
 }
 
-// Check if rx buffer is empty
-bool hc06_rx_buffer_empty(hc06_t* hc06)
-{
-    return hc06->rx_buffer.tail == hc06->rx_buffer.head;
-}
-
-// Interrupt handler for receiving UART data
-void hc06_uart_rx(void) {
-    if(p_hc06 != NULL) {
-        // Read from UART FIFO until it's empty
-        while(uart_is_readable(p_hc06->uart_id)) {
-            // Read a byte from the FIFO
-            uint8_t rx_data = uart_getc(p_hc06->uart_id);
-
-            // Write the byte to the circular buffer
-            p_hc06->rx_buffer.buffer[p_hc06->rx_buffer.head] = rx_data;
-
-            // Increment head position
-            p_hc06->rx_buffer.head = (p_hc06->rx_buffer.head + 1) % BUF_SIZE; 
-        }
-    }
-}
-
 // Transfer data from rx buffer to a buffer provided by the user
 // Returns number of bytes transferred
-uint8_t hc06_transfer_rx_buffer(hc06_t* hc06, char buf[], uint8_t buf_len)
+uint8_t hc06_receive_non_blocking(hc06_t* hc06, char buf[], uint8_t buf_len)
 {
-    // Handle case where buffer is too small
-    if(buf_len < BUF_SIZE) {
+    // Reject invalid buffer length
+    if(buf_len != HC06_BUF_SIZE) {
         return 0;
     }
 
@@ -77,7 +72,7 @@ uint8_t hc06_transfer_rx_buffer(hc06_t* hc06, char buf[], uint8_t buf_len)
     irq_set_enabled(hc06->uart_irq, false);
     {
         // Read from circular buffer until it's empty
-        while(!hc06_rx_buffer_empty(hc06)) {
+        while(hc06_has_received_data(hc06)) {
             // Read a byte from the circular buffer
             uint8_t rx_data = hc06->rx_buffer.buffer[hc06->rx_buffer.tail];
 
@@ -85,7 +80,7 @@ uint8_t hc06_transfer_rx_buffer(hc06_t* hc06, char buf[], uint8_t buf_len)
             buf[i] = rx_data;
 
             // Increment tail position
-            hc06->rx_buffer.tail = (hc06->rx_buffer.tail + 1) % BUF_SIZE;
+            hc06->rx_buffer.tail = (hc06->rx_buffer.tail + 1) % HC06_BUF_SIZE;
 
             // Increment index
             i++;
@@ -96,5 +91,11 @@ uint8_t hc06_transfer_rx_buffer(hc06_t* hc06, char buf[], uint8_t buf_len)
 
     // Return number of bytes transferred
     return i;
+}
+
+// Check if rx buffer is empty
+bool hc06_has_received_data(hc06_t* hc06)
+{
+    return hc06->rx_buffer.tail != hc06->rx_buffer.head;
 }
 

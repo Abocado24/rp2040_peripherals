@@ -6,7 +6,7 @@
 #include "hardware/gpio.h"
 
 // Defines
-#define HCSR04_MAX_GPIO_PINS        29      // Max number of GPIO pins on RP2040
+#define HCSR04_MAX_GPIO_PINS        40      // Max number of GPIO pins on RP2040
 #define HCSR04_SPEED_OF_SOUND       0.0343  // speed of sound in cm/us (34300 cm/s)
 #define HCSR04_DEFAULT_TIMEOUT_US   25000   // 25 ms, for a max distance of ~4 meters
 #define HCSR04_DIST_INIT            -1.0f
@@ -25,8 +25,11 @@ typedef enum {
 } hcsr04_rc_t;
 
 typedef struct {
+    // GPIO defines
     uint trigger_pin;
     uint echo_pin;
+   
+    // Sensor defines
     volatile float current_distance;
     volatile bool echo_received;
     absolute_time_t start_time;

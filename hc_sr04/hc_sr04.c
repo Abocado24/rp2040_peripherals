@@ -35,7 +35,7 @@ static void handle_echo_irq(uint gpio, uint32_t events) {
         } else if (events & GPIO_IRQ_EDGE_FALL) {
             // Get an accurate end time for for the echo pulse
             sensor->end_time = get_absolute_time();
-            // 
+            // Set echo received flag to true now that measurement is complete
             sensor->echo_received = true;
             gpio_set_irq_enabled(sensor->echo_pin, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, false);
         }
