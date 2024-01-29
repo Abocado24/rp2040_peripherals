@@ -39,4 +39,11 @@ add_executable(hc_06_demo hc_06_demo.c)
 target_link_libraries(hc_06_demo pico_stdlib hc_06)
 pico_add_extra_outputs(hc_06_demo)
 
+# Create the hc_sr_04_demo executable
+add_executable(hc_sr04_demo hc_sr04_demo.c)
+target_link_libraries(hc_sr04_demo pico_stdlib hc_sr04)
+pico_enable_stdio_usb(hc_sr04_demo 1)
+pico_enable_stdio_uart(hc_sr04_demo 0)
+pico_add_extra_outputs(hc_sr04_demo)
+
 # Repeat for any other demo executables
