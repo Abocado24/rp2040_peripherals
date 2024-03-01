@@ -20,6 +20,9 @@ endif()
 # Initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+# Add FreeRTOS
+add_subdirectory(freertos)
+
 # Add compile options
 add_compile_options(-Wall
         -Wno-format          # int != int32_t as far as the compiler is concerned because gcc has int32_t as long int
@@ -45,5 +48,19 @@ target_link_libraries(hc_sr04_demo pico_stdlib hc_sr04)
 pico_enable_stdio_usb(hc_sr04_demo 1)
 pico_enable_stdio_uart(hc_sr04_demo 0)
 pico_add_extra_outputs(hc_sr04_demo)
+
+# Create the mpu_6050_demo executable
+add_executable(mpu_6050_demo mpu_6050_demo.c)
+target_link_libraries(mpu_6050_demo pico_stdlib mpu_6050)
+pico_enable_stdio_usb(mpu_6050_demo 1)
+pico_enable_stdio_uart(mpu_6050_demo 0)
+pico_add_extra_outputs(mpu_6050_demo)
+
+# Create the integration_demo executable
+add_executable(integration_demo integration_demo.c)
+target_link_libraries(integration_demo pico_stdlib hc_06 hc_sr04 mpu_6050 freertos)
+pico_enable_stdio_usb(integration_demo 1)
+pico_enable_stdio_uart(integration_demo 0)
+pico_add_extra_outputs(integration_demo)
 
 # Repeat for any other demo executables
