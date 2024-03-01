@@ -3,7 +3,6 @@
 #include "mpu_6050.h"
 
 const double GYRO_WEIGHT = 0.8;
-const double YAW_ALPHA = 0.05;
 const uint32_t SAMPLES_CALIBRATION = 10000;
 const uint32_t SAMPLES_NOISE_ESTIMATION = 1000;
 
@@ -72,15 +71,7 @@ void estimate_angles(vec_double_t accel_data, vec_double_t gyro_data, double dt,
     angles->y = GYRO_WEIGHT*gyro_angle_y + (1-GYRO_WEIGHT)*accel_angle_y;
     
     // yaw calculation is its own thing since there's nothing from accel to fuse with
-    // reduce the effect of drift using an exponential filter, but the filter should not be used on the first read (hacky implementation)
-    static uint8_t first_read = 1;
-    if(first_read == 0) {
-        angles->z = YAW_ALPHA*gyro_angle_z + (1-YAW_ALPHA)*angles->z;
-    }
-    else {
-        angles->z = gyro_angle_z;
-        first_read = 0;
-    }
+    angles->z = gyro_angle_z;
 }
 
 int main() {
