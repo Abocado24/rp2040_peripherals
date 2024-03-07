@@ -32,6 +32,9 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-Wno-maybe-uninitialized)
 endif()
 
+# Add common libraries
+add_subdirectory(common_lib)
+
 # Add subdirectories for peripheral libraries
 add_subdirectory(hc_06)
 add_subdirectory(hc_sr04)
@@ -55,6 +58,13 @@ target_link_libraries(mpu_6050_demo pico_stdlib mpu_6050)
 pico_enable_stdio_usb(mpu_6050_demo 1)
 pico_enable_stdio_uart(mpu_6050_demo 0)
 pico_add_extra_outputs(mpu_6050_demo)
+
+# Create the edf_demo executable
+add_executable(edf_demo edf_demo.c)
+target_link_libraries(edf_demo edf pico_stdlib hardware_timer freertos)
+pico_enable_stdio_usb(edf_demo 1)
+pico_enable_stdio_uart(edf_demo 0)
+pico_add_extra_outputs(edf_demo)
 
 # Create the integration_demo executable
 add_executable(integration_demo integration_demo.c)

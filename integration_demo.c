@@ -7,7 +7,6 @@
 #include <queue.h>
 
 const double GYRO_WEIGHT = 0.8;
-const double YAW_ALPHA = 0.05;
 const uint32_t SAMPLES_CALIBRATION = 10000;
 
 typedef struct {
@@ -43,7 +42,7 @@ void mpu_6050_read_task(void *pvParameters)
         xQueueSend(mpu_6050_data_queue, &data, portMAX_DELAY);
 
         // Delay to control read frequency
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
 
@@ -78,6 +77,9 @@ void mpu_6050_process_task(void *pvParameters)
 
             // Send angles to print task
             xQueueSend(angles_queue, &angles, portMAX_DELAY);
+
+            // Delay to control frequency
+            vTaskDelay(pdMS_TO_TICKS(10));
         }
     }
 }
@@ -87,11 +89,21 @@ void mpu_6050_print_task(void *pvParameters)
     vec_double_t angles;
 
     while (1) {
-        // Receive latest angles from mpu_6050_process_task
-        if( xQueueReceive(angles_queue, &angles, portMAX_DELAY) == pdPASS ) {
-            // Print received roll, pitch and yaw
+        // Initially assume the queue is empty
+        BaseType_t xReceived = pdFALSE;
+
+        // Go through the queue until the latest angle passed from mpu_6050_process_task is received
+        while(xQueueReceive(angles_queue, &angles, 0) == pdPASS) {
+            xReceived = pdTRUE;
+        }
+
+        // If at least one item was received, print the angles
+        if(xReceived == pdTRUE) {
             printf("%f/%f/%f\n", angles.x, angles.y, angles.z);
         }
+
+        // Delay to control frequency
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -122,8 +134,8 @@ int main()
     mpu_6050_calibrate(&mpu_6050, SAMPLES_CALIBRATION);
 
     // Create queues
-    mpu_6050_data_queue = xQueueCreate(10, sizeof(mpu_6050_data_t));
-    angles_queue = xQueueCreate(10, sizeof(vec_double_t));
+    mpu_6050_data_queue = xQueueCreate(20, sizeof(mpu_6050_data_t));
+    angles_queue = xQueueCreate(20, sizeof(vec_double_t));
 
     // Create tasks, passing the address of mpu_6050 as the parameter
     xTaskCreate(mpu_6050_read_task, "MPU-6050 Read Task", configMINIMAL_STACK_SIZE, (void*)&mpu_6050, 3, NULL);

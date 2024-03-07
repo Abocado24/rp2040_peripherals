@@ -104,6 +104,7 @@ mpu_6050_rc_t mpu_6050_reset(mpu_6050_t *mpu_6050);
 mpu_6050_rc_t mpu_6050_calibrate(mpu_6050_t* mpu_6050, uint32_t samples);
 
 mpu_6050_rc_t mpu_6050_read_raw(mpu_6050_t* mpu_6050);
+mpu_6050_rc_t mpu_6050_read_raw_non_blocking(mpu_6050_t* mpu_6050);
 mpu_6050_rc_t mpu_6050_convert_read(mpu_6050_t* mpu_6050);
 
 

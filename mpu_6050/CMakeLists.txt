@@ -6,11 +6,6 @@ cmake_minimum_required(VERSION 3.13)
 # Define the project name
 project(mpu_6050)
 
-# Add the common_lib/i2c_general directory to the build
-add_subdirectory(../common_lib/i2c_general ${CMAKE_CURRENT_BINARY_DIR}/vector_lib_build)
-# Add the common_lib/vector_lib directory to the build
-add_subdirectory(../common_lib/vector_lib ${CMAKE_CURRENT_BINARY_DIR}/i2c_general_build)
-
 # If mpu_6050 follows the include/src structure, adjust the source file path.
 # For this example, I'm assuming mpu_6050.c is directly under mpu_6050 directory.
 # Adjust this if your file is inside an src directory.
