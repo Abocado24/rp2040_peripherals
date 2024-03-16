@@ -68,7 +68,7 @@ pico_add_extra_outputs(edf_demo)
 
 # Create the integration_demo executable
 add_executable(integration_demo integration_demo.c)
-target_link_libraries(integration_demo pico_stdlib hc_06 hc_sr04 mpu_6050 freertos)
+target_link_libraries(integration_demo pico_stdlib hc_06 hc_sr04 mpu_6050 edf freertos)
 pico_enable_stdio_usb(integration_demo 1)
 pico_enable_stdio_uart(integration_demo 0)
 pico_add_extra_outputs(integration_demo)

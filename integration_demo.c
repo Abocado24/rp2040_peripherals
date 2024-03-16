@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <pico/stdlib.h>
 #include "mpu_6050.h"
+#include "edf.h"
 
 #include <FreeRTOS.h>
 #include <task.h>
@@ -14,6 +15,14 @@ typedef struct {
     vec_double_t gyro_data;
     double dt;
 } mpu_6050_data_t;
+
+TaskHandle_t mpu_6050_read_task_handle = NULL;
+TaskHandle_t mpu_6050_process_task_handle = NULL;
+TaskHandle_t mpu_6050_print_task_handle = NULL;
+
+const TickType_t mpu_6050_read_task_period = pdMS_TO_TICKS(1);
+const TickType_t mpu_6050_process_task_period = pdMS_TO_TICKS(10);
+const TickType_t mpu_6050_print_task_period = pdMS_TO_TICKS(100);
 
 QueueHandle_t mpu_6050_data_queue;
 QueueHandle_t angles_queue;
@@ -138,11 +147,20 @@ int main()
     angles_queue = xQueueCreate(20, sizeof(vec_double_t));
 
     // Create tasks, passing the address of mpu_6050 as the parameter
-    xTaskCreate(mpu_6050_read_task, "MPU-6050 Read Task", configMINIMAL_STACK_SIZE, (void*)&mpu_6050, 3, NULL);
-    xTaskCreate(mpu_6050_process_task, "MPU-6050 Process Task", configMINIMAL_STACK_SIZE, (void*)&mpu_6050, 2, NULL);
-    xTaskCreate(mpu_6050_print_task, "MPU-6050 Print Task", configMINIMAL_STACK_SIZE, (void*)&mpu_6050, 1, NULL);
+    xTaskCreate(mpu_6050_read_task, "MPU-6050 Read Task", configMINIMAL_STACK_SIZE, (void*)&mpu_6050, EDF_UNSELECTED_PRIORITY, &mpu_6050_read_task_handle);
+    xTaskCreate(mpu_6050_process_task, "MPU-6050 Process Task", configMINIMAL_STACK_SIZE, NULL, EDF_UNSELECTED_PRIORITY, &mpu_6050_process_task_handle);
+    xTaskCreate(mpu_6050_print_task, "MPU-6050 Print Task", configMINIMAL_STACK_SIZE, NULL, EDF_UNSELECTED_PRIORITY, &mpu_6050_print_task_handle);
  
-    vTaskStartScheduler();
+    // Define initial tasklist for EDF scheduler
+    edf_task_t tasklist[3] = 
+    {
+        {.task_handle=mpu_6050_read_task_handle, .task_deadline=mpu_6050_read_task_period, .task_period=mpu_6050_read_task_period, .task_state=EDF_TASK_READY},
+        {.task_handle=mpu_6050_process_task_handle, .task_deadline=mpu_6050_process_task_period, .task_period=mpu_6050_process_task_period, .task_state=EDF_TASK_READY},
+        {.task_handle=mpu_6050_print_task_handle, .task_deadline=mpu_6050_print_task_period, .task_period=mpu_6050_print_task_period, .task_state=EDF_TASK_READY},
+    };
+
+    // Start the EDF scheduler
+    edf_start(tasklist, 3);
 
     while(1);
 }
