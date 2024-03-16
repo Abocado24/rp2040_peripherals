@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
-#include "hc_sr04/hc_sr04.h"
+#include "hc_sr04.h"
 
 #define ECHO_PIN 6
 #define TRIGGER_PIN 7

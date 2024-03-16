@@ -1,6 +1,5 @@
-#include "hc_06/hc_06.h"
-
-#include "pico/stdlib.h"
+#include <pico/stdlib.h>
+#include "hc_06.h"
 
 #define UART_ID uart0
 #define UART_BAUDRATE 9600
