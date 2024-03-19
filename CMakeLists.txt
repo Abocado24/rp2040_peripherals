@@ -39,6 +39,7 @@ add_subdirectory(common_lib)
 add_subdirectory(hc_06)
 add_subdirectory(hc_sr04)
 add_subdirectory(mpu_6050)
+add_subdirectory(dc_motor)
 
 # Create the hc_06_demo executable
 add_executable(hc_06_demo hc_06_demo.c)
@@ -58,6 +59,13 @@ target_link_libraries(mpu_6050_demo pico_stdlib mpu_6050)
 pico_enable_stdio_usb(mpu_6050_demo 1)
 pico_enable_stdio_uart(mpu_6050_demo 0)
 pico_add_extra_outputs(mpu_6050_demo)
+
+# Create the mpu_6050_demo executable
+add_executable(dc_motor_demo dc_motor_demo.c)
+target_link_libraries(dc_motor_demo pico_stdlib dc_motor)
+pico_enable_stdio_usb(dc_motor_demo 1)
+pico_enable_stdio_uart(dc_motor_demo 0)
+pico_add_extra_outputs(dc_motor_demo)
 
 # Create the edf_demo executable
 add_executable(edf_demo edf_demo.c)
