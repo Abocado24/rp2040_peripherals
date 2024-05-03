@@ -2,6 +2,7 @@
 #define VECTOR_LIB_H
 
 #include <stdint.h>
+#include <string.h>
 
 // Definition for a vector of int16_t
 typedef struct {

@@ -2,9 +2,7 @@
 
 // Set all values in a vec_double_t to 0
 void clear_double_vector(vec_double_t *vec) {
-    vec->x = 0.0;
-    vec->y = 0.0;
-    vec->z = 0.0;
+    memset(vec, 0, sizeof(vec_double_t));
 }
 
 // Set values in a vec_double_t to desired values
@@ -16,16 +14,12 @@ void set_double_vector(vec_double_t *vec, double x, double y, double z) {
 
 // Copy values from a vec_double_t to another
 void copy_double_vector(vec_double_t *src, vec_double_t *dst) {
-    dst->x = src->x;
-    dst->y = src->y;
-    dst->z = src->z;
+    memcpy(dst, src, sizeof(vec_double_t));
 }
 
 // Clear all values in a vec_int16_t
 void clear_int16_vector(vec_int16_t *vec) {
-    vec->x = 0;
-    vec->y = 0;
-    vec->z = 0;
+    memset(vec, 0, sizeof(vec_int16_t));
 }
 
 // Set values in a vec_int16_t to desired values
@@ -37,7 +31,5 @@ void set_int16_vector(vec_int16_t *vec, int16_t x, int16_t y, int16_t z) {
 
 // Copy values from a vec_int16_t to another
 void copy_int16_vector(vec_int16_t *src, vec_int16_t *dst) {
-    dst->x = src->x;
-    dst->y = src->y;
-    dst->z = src->z;
+    memcpy(dst, src, sizeof(vec_int16_t));
 }
