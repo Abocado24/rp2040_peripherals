@@ -10,7 +10,7 @@ project(hc_06)
 add_library(hc_06 STATIC src/hc_06.c)
 
 # Specify include directories
-target_include_directories(hc_06 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(hc_06 PUBLIC include)
 
 # Link library with dependencies
-target_link_libraries(hc_06 pico_stdlib)
+target_link_libraries(hc_06 pico_stdlib circular_buffer)
