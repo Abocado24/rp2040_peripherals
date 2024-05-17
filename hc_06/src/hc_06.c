@@ -78,6 +78,8 @@ static void handle_uart_irq(void) {
  *          Assumes that the system will only use one HC-06 device.
  * @param   device          The HC-06 device struct.
  * @param   uart_id         The RP2040 UART peripheral to use with this device.
+ * @param   uart_tx_pin     tx pin used for UART transmissions.
+ * @param   uart_rx_pin     rx pin used for UART transmissions.
  * @param   uart_baudrate   The baudrate to use for UART communication.
  * @param   uart_irq        The handler for UART interrupts.
  * @param   tx_buffer       Buffer used to store data to transmit over UART.
@@ -90,7 +92,7 @@ static void handle_uart_irq(void) {
  *                          - HC06_RC_ERROR_TX_BUFFER:  Could not initialize tx buffer.
  *                          - HC06_RC_ERROR_RX_BUFFER:  Could not initialize rx buffer.
  */
-hc06_rc_t hc06_init(hc06_t * device, uart_inst_t * uart_id, uint32_t uart_baudrate, uint8_t uart_irq, uint8_t * tx_buffer, uint16_t tx_buffer_size, uint8_t * rx_buffer, uint16_t rx_buffer_size) {
+hc06_rc_t hc06_init(hc06_t * device, uart_inst_t * uart_id, uint8_t uart_tx_pin, uint8_t uart_rx_pin, uint32_t uart_baudrate, uint8_t uart_irq, uint8_t * tx_buffer, uint16_t tx_buffer_size, uint8_t * rx_buffer, uint16_t rx_buffer_size) {
     if(device == NULL || uart_id == NULL || tx_buffer == NULL || rx_buffer == NULL) {
         return HC06_RC_BAD_ARG;
     }
@@ -102,6 +104,10 @@ hc06_rc_t hc06_init(hc06_t * device, uart_inst_t * uart_id, uint32_t uart_baudra
 
     // Set global pointer to hc06 instance
     hc06 = device;
+
+    // Set UART rx and tx pin functions
+    gpio_set_function(uart_tx_pin, GPIO_FUNC_UART);
+    gpio_set_function(uart_rx_pin, GPIO_FUNC_UART);
 
     // Initialize tx circular buffer
     circular_buffer_rc_t tx_buffer_init_rc = circular_buffer_init(&device->tx_buffer, tx_buffer, tx_buffer_size, sizeof(uint8_t));

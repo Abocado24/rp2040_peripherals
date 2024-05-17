@@ -19,14 +19,11 @@
 // Demo HC-06 library by echoing back received data
 int main()
 {
-    gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
-    gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
-
     uint8_t rx_buffer[HC06_DEFAULT_BUFFER_SIZE];
     uint8_t tx_buffer[HC06_DEFAULT_BUFFER_SIZE];
 
     hc06_t hc06;
-    hc06_init(&hc06, UART_ID, UART_BAUDRATE, UART_IRQ, tx_buffer, sizeof(tx_buffer), rx_buffer, sizeof(rx_buffer));
+    hc06_init(&hc06, UART_ID, UART_TX_PIN, UART_RX_PIN, UART_BAUDRATE, UART_IRQ, tx_buffer, sizeof(tx_buffer), rx_buffer, sizeof(rx_buffer));
 
     char init_msg[] = "UART for HC-06 is set up\n";
     uart_puts(uart0, init_msg);
